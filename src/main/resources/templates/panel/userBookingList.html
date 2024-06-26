@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <div th:replace="fragments/navbar :: navbar-css"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body>
+<div th:insert="fragments/navbar :: navbar"></div>
+<div class="container-xl">
+
+    <div class="title">
+    <a href="#" th:href="@{/}">
+        <i class="fa fa-undo" aria-hidden="true"> back</i>
+    </a>
+    <h1 class="title" th:text="|${userLogin} bookings|"></h1>
+    </div>
+
+    <span th:each="booking : ${listBookings}">
+
+    </span>
+    <table class="table table-striped table-responsive">
+        <thead>
+        <tr>
+            <th sec:authorize="hasRole('ADMIN')">Id
+                <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage} + '?sortField=id&sortDir=' + ${reverseSortDir}}"
+                   class="sorticon">
+                    <i class="fas fa-sort"></i>
+                </a>
+            </th>
+
+            <th>Date
+                <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage} + '?sortField=date&sortDir=' + ${reverseSortDir}}"
+                   class="sorticon">
+                    <i class="fas fa-sort"></i>
+                </a>
+            </th>
+            <th>Start
+                <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage} + '?sortField=start&sortDir=' + ${reverseSortDir}}"
+                   class="sorticon">
+                    <i class="fas fa-sort"></i>
+                </a>
+            </th>
+            <th>End
+                <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage} + '?sortField=end&sortDir=' + ${reverseSortDir}}"
+                   class="sorticon">
+                    <i class="fas fa-sort"></i>
+                </a>
+            </th>
+            <th>Room</th>
+            <th>Actions</th>
+
+        </thead>
+        <tbody>
+        <tr th:if="${listBookings.empty}">
+            <td colspan="4"> No Bookings Available</td>
+        </tr>
+
+        <tr th:each="booking : ${listBookings}">
+            <td sec:authorize="hasRole('ADMIN')" th:text="${booking.id}"></td>
+            <td th:text="${#temporals.format(booking.date, 'dd-MM-yyyy')}"></td>
+            <td th:text="${#temporals.format(booking.start, 'HH:mm')}"></td>
+            <td th:text="${#temporals.format(booking.end, 'HH:mm')}"></td>
+            <td th:text="${booking.room.getName()}"></td>
+
+            <td>
+                <a th:href="@{/addextrahour/{id}(id=${booking.id})}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus-square"></i></a>
+
+                <a sec:authorize="hasRole('ADMIN')" th:href="@{/panel/update/booking/{id}(id=${booking.id})}"
+                   class="btn btn-primary btn-sm"><i class="fas fa-user-edit"></i></a>
+
+                <a th:href="@{/delete/booking/{id}/confirmation(id=${booking.id})}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash"></i></a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${totalPages > 1}">
+        <div class="row justify-content-md-center">
+            <div class="col-sm-auto">
+                Total Items: [[${totalItems}]] - Page [[${currentPage}]] of [[${totalPages}]]
+            </div>
+            <div class="col-sm-auto">
+                <a th:if="${currentPage > 1}"
+                   th:href="@{'/user/'+ ${id} +'/bookings/page/' + 1 + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                   class="link-primary">First</a>
+                <span th:unless="${currentPage > 1}">First</span>
+            </div>
+            <div class="col-sm-auto">
+                <a th:if="${currentPage > 1}"
+                   th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage - 1} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                   class="link-primary">Previous</a>
+                <span th:unless="${currentPage > 1}">Previous</span>
+            </div>
+            <div class="col-sm-auto">
+
+                <span th:if="${totalPages <=10}">
+                    <span th:each="i: ${#numbers.sequence(1, totalPages)}">
+                    <a th:if="${currentPage != i}"
+                       th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                       class="link-primary">[[${i}]]</a>
+                    <span th:unless="${currentPage != i}">[[${i}]]</span> &nbsp; &nbsp;
+                </span>
+                </span>
+
+                <span th:if="${totalPages > 10}">
+                    <span th:if="${currentPage <=5 || currentPage >= totalPages - 4}">
+                        <span th:each="i: ${#numbers.sequence(1, 5)}">
+                            <a th:if="${currentPage != i}"
+                               th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">[[${i}]]</a>
+                            <span th:unless="${currentPage != i}">[[${i}]]</span>
+                        </span>
+
+                            <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + 6 + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">...</a>
+                           <span>
+                           <span th:each="i: ${#numbers.sequence(totalPages - 4, totalPages)}">
+                            <a th:if="${currentPage != i}"
+                               th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">[[${i}]]</a>
+                            <span th:unless="${currentPage != i}">[[${i}]]</span>
+                            </span>
+                        </span>  &nbsp; &nbsp;
+                        </span>
+
+                    <span th:if="${currentPage > 5 && currentPage < totalPages - 4}">
+
+                            <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage - 5} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">...</a>
+                            <span th:each="i: ${#numbers.sequence(currentPage - 4, currentPage + 4)}">
+                                <a th:if="${currentPage != i}"
+                                   th:href="@{'/panel/user/'+ ${id} +'/bookings/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                                   class="link-primary">[[${i}]]</a>
+                                <span th:unless="${currentPage != i}">[[${i}]]</span>
+                            </span>
+
+                             <a th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage + 5} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                                class="link-primary">...</a>
+
+                    </span>
+                </span>
+
+            </div>
+            <div class="col-sm-auto">
+                <a th:if="${currentPage < totalPages}"
+                   th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${currentPage + 1}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                   class="link-primary">Next</a>
+                <span th:unless="${currentPage < totalPages}">Next</span>
+            </div>
+            <div class="col-sm-auto">
+                <a th:if="${currentPage < totalPages}"
+                   th:href="@{'/user/'+ ${id} +'/bookings/page/' + ${totalPages}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                   class="link-primary">Last</a>
+                <span th:unless="${currentPage < totalPages}">Last</span>
+            </div>
+        </div>
+    </div>
+    <span class="btn btn-success btn-sm disabled"><i class="fas fa-plus-square"></i></span> - add extra hour
+    <span class="btn btn-danger btn-sm disabled"><i class="fas fa-trash"></i></span> - delete booking
+</div>
+
+
+
+<div th:replace="fragments/footer :: footer"/>
+</body>
+</html>

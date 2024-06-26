@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    <link rel="stylesheet" th:href="@{/css/adminpanel.css}"/>
+    <div th:replace="fragments/navbar :: navbar-css"/>
+</head>
+<body>
+<div th:insert="fragments/navbar :: navbar"></div>
+<div class="container">
+    <section class="panel  py-md-5">
+        <div class="container">
+            <h1 class="title">Users List</h1>
+
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-responsive">
+                        <thead>
+                        <tr>
+                            <th>Id
+                                <a th:href="@{'/panel/users/page/' + ${currentPage} + '?sortField=id&sortDir=' + ${reverseSortDir}}"
+                                   class="sorticon">
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>Login
+                                <a th:href="@{'/panel/users/page/' + ${currentPage} + '?sortField=login&sortDir=' + ${reverseSortDir}}"
+                                   class="sorticon">
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>First Name
+                                <a th:href="@{'/panel/users/page/' + ${currentPage} + '?sortField=firstName&sortDir=' + ${reverseSortDir}}"
+                                   class="sorticon">
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>Last Name
+                                <a th:href="@{'/panel/users/page/' + ${currentPage} + '?sortField=lastName&sortDir=' + ${reverseSortDir}}"
+                                   class="sorticon">
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>Email
+                                <a th:href="@{'/panel/users/page/' + ${currentPage} + '?sortField=email&sortDir=' + ${reverseSortDir}}"
+                                   class="sorticon">
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>isEnable</th>
+                            <th>Create Date</th>
+                            <th>Update Date</th>
+                            <th>isLocked</th>
+                            <th>Role</th>
+                            <th>Bookings</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${listUsers.empty}">
+                            <td colspan="12"> No Users Available</td>
+                        </tr>
+
+                        <tr th:each="user : ${listUsers}">
+                            <td th:text="${user.id}"></td>
+                            <td th:text="${user.login}"></td>
+                            <td th:text="${user.firstName}"></td>
+                            <td th:text="${user.lastName}"></td>
+                            <td th:text="${user.email}"></td>
+                            <td th:text="${user.enable}"></td>
+                            <td th:text="${#temporals.format(user.createTime, 'dd-MM-yyyy HH:mm:ss')}"></td>
+                            <td th:text="${#temporals.format(user.updateTime,'dd-MM-yyyy HH:mm:ss')}"></td>
+                            <td th:text="${user.locked}"></td>
+                            <td>
+                <span th:each="role,iterStat: ${user.roles}">
+                        <span th:text="${role.role}"/><th:block th:if="${!iterStat.last}">,</th:block>
+                </span>
+                            </td>
+
+                            <td>
+                                <a th:href="@{'/panel/user/' + ${user.id} + '/bookings'}">View bookings</a>
+                            </td>
+
+
+                            <td><a th:href="@{/panel/update/user/{id}(id=${user.id})}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-user-edit"></i></a>
+                                <a th:href="@{/panel/delete/user/{id}/confirmation(id=${user.id})}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div th:if="${totalPages > 1}">
+                <div class="row justify-content-md-center">
+                    <div class="col-sm-auto">
+                        Total Items: [[${totalItems}]] - Page [[${currentPage}]] of [[${totalPages}]]
+                    </div>
+                    <div class="col-sm-auto">
+                        <a th:if="${currentPage > 1}"
+                           th:href="@{'/panel/users/page/' + 1 + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                           class="link-primary">First</a>
+                        <span th:unless="${currentPage > 1}">First</span>
+                    </div>
+                    <div class="col-sm-auto">
+                        <a th:if="${currentPage > 1}"
+                           th:href="@{'/panel/users/page/' + ${currentPage - 1} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                           class="link-primary">Previous</a>
+                        <span th:unless="${currentPage > 1}">Previous</span>
+                    </div>
+                    <div class="col-sm-auto">
+
+                <span th:if="${totalPages <=10}">
+                    <span th:each="i: ${#numbers.sequence(1, totalPages)}">
+                    <a th:if="${currentPage != i}"
+                       th:href="@{'/panel/users/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                       class="link-primary">[[${i}]]</a>
+                    <span th:unless="${currentPage != i}">[[${i}]]</span> &nbsp; &nbsp;
+                </span>
+                </span>
+
+                        <span th:if="${totalPages > 10}">
+                    <span th:if="${currentPage <=5 || currentPage >= totalPages - 4}">
+                        <span th:each="i: ${#numbers.sequence(1, 5)}">
+                            <a th:if="${currentPage != i}"
+                               th:href="@{'/panel/users/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">[[${i}]]</a>
+                            <span th:unless="${currentPage != i}">[[${i}]]</span>
+                        </span>
+
+                            <a th:href="@{'/panel/users/page/' + 6 + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">...</a>
+                           <span>
+                           <span th:each="i: ${#numbers.sequence(totalPages - 4, totalPages)}">
+                            <a th:if="${currentPage != i}"
+                               th:href="@{'/panel/users/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">[[${i}]]</a>
+                            <span th:unless="${currentPage != i}">[[${i}]]</span>
+                            </span>
+                        </span>  &nbsp; &nbsp;
+                        </span>
+
+                    <span th:if="${currentPage > 5 && currentPage < totalPages - 4}">
+
+                            <a th:href="@{'/panel/users/page/' + ${currentPage - 5} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                               class="link-primary">...</a>
+                            <span th:each="i: ${#numbers.sequence(currentPage - 4, currentPage + 4)}">
+                                <a th:if="${currentPage != i}"
+                                   th:href="@{'/panel/users/page/' + ${i}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                                   class="link-primary">[[${i}]]</a>
+                                <span th:unless="${currentPage != i}">[[${i}]]</span>
+                            </span>
+
+                             <a th:href="@{'/panel/users/page/' + ${currentPage + 5} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                                class="link-primary">...</a>
+
+                    </span>
+                </span>
+
+                    </div>
+                    <div class="col-sm-auto">
+                        <a th:if="${currentPage < totalPages}"
+                           th:href="@{'/panel/users/page/' + ${currentPage + 1}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                           class="link-primary">Next</a>
+                        <span th:unless="${currentPage < totalPages}">Next</span>
+                    </div>
+                    <div class="col-sm-auto">
+                        <a th:if="${currentPage < totalPages}"
+                           th:href="@{'/panel/users/page/' + ${totalPages}+ '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir}} "
+                           class="link-primary">Last</a>
+                        <span th:unless="${currentPage < totalPages}">Last</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<div th:replace="fragments/footer :: footer"/>
+</body>
+</html>
